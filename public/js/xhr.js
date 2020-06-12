@@ -15,14 +15,13 @@ export const ajax = (() => {
       };
     });      
   };
-  
   return {
     get(url) {
      return req('GET', url);
     },
     post(url, payload) {
       return req('POST', url, payload);
-    },
+     },
    patch(url, payload) {
      return req('PATCH', url, payload);
     },
