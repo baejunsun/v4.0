@@ -17,7 +17,7 @@ const render = () => {
 
   const _todos = todos.filter(({ completed }) => (navState === 'completed' ? completed : navState === 'active' ? !completed : true));
   _todos.forEach(({ id, content, completed }) => {
-    console.log(todos.content)
+    
     html += `<li id="${id}" class="todo-item">
         <input id="ck-${id}" class="checkbox" type="checkbox" ${completed ? 'checked' : ''}>
         <label for="ck-${id}">${content}</label>
