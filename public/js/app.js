@@ -17,6 +17,7 @@ const render = () => {
 
   const _todos = todos.filter(({ completed }) => (navState === 'completed' ? completed : navState === 'active' ? !completed : true));
   _todos.forEach(({ id, content, completed }) => {
+    console.log(todos.content)
     html += `<li id="${id}" class="todo-item">
         <input id="ck-${id}" class="checkbox" type="checkbox" ${completed ? 'checked' : ''}>
         <label for="ck-${id}">${content}</label>
@@ -30,21 +31,19 @@ const render = () => {
 };
 
 const getTodos = () => {
-  ajax.get('/todos', _todos => {
-  todos = _todos
+  ajax.get('/todos', _todos => { todos = _todos});
   todos.sort((todo1, todo2) => todo2.id - todo1.id);
   render();
-  });
 };
 
 const generateId = () => (todos.length ? Math.max(...todos.map(todo => todo.id)) + 1 : 1);
 
 const addTodo = content => {
-  let newTodo = { id: generateId(), content, completed: false};
+  let newTodo = { "id" : generateId(), content, completed: false};
   ajax.post('/todos', newTodo, todo => todos = [todo, ...todos]);
   // todos = [{ id: generateId(), content, completed: false }, ...todos];
   // console.log('[addTodo]', todos);
-
+  console.log(newTodo);
   render();
 };
 
@@ -53,7 +52,7 @@ const toggleTodo = id => {
     todos = todos.map(todo => todo.id === +id ? { ...todo, completed: !todo.completed } : todo);
   });
   // todos = todos.map(todo => (todo.id === +id ? { ...todo, completed: !todo.completed } : todo));
-  console.log('[toggleTodo]', todos);
+  // console.log('[toggleTodo]', todos);
   render();
 };
 
@@ -62,7 +61,7 @@ const removeTodo = id => {
     todos = todos.filter(todo => todo.id !== +id);
   });
   // todos = todos.filter(todo => todo.id !== +id);
-  console.log('[removeTodo]', todos);
+  // console.log('[removeTodo]', todos);
   render();
 };
 
@@ -79,7 +78,7 @@ const toggleCompleteAll = completed => {
 const removeCompleted = () => {
   todos.forEach(todo => ajax.delete(`/todos/${todo.id}`, todos = todos.filter(todo => !todo.completed)));
   // todos = todos.filter(todo => !todo.completed);
-  console.log('[removeCompleted]', todos);
+  // console.log('[removeCompleted]', todos);
 
   render();
 };
