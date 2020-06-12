@@ -15,12 +15,15 @@ const render = () => {
 
   let html = '';
 
+  console.log("todos = " + todos);
   const _todos = todos.filter(({ completed }) => (navState === 'completed' ? completed : navState === 'active' ? !completed : true));
-  _todos.forEach(({ id, content, completed }) => {
+
+  console.log("_todos = " + _todos);
+  _todos.forEach(todo => {
     
-    html += `<li id="${id}" class="todo-item">
-        <input id="ck-${id}" class="checkbox" type="checkbox" ${completed ? 'checked' : ''}>
-        <label for="ck-${id}">${content}</label>
+    html += `<li id="${todo.id}" class="todo-item">
+        <input id="ck-${todo.id}" class="checkbox" type="checkbox" ${todo.completed ? 'checked' : ''}>
+        <label for="ck-${todo.id}">${todo.content}</label>
         <i class="remove-todo far fa-times-circle"></i>
       </li>`;
   });
@@ -30,64 +33,73 @@ const render = () => {
   $activeTodos.textContent = todos.filter(({ completed }) => !completed).length;
 };
 
-const getTodos = () => {
-  ajax.get('/todos', _todos => { todos = _todos});
-  todos.sort((todo1, todo2) => todo2.id - todo1.id);
-  render();
-};
+// const getTodos = () => {
+//   navState = 'all';
+//   ajax.get('/todos', _todos => { todos = _todos});
+//   todos.sort((todo1, todo2) => todo2.id - todo1.id);
+//   render();
+// };
 
 const generateId = () => (todos.length ? Math.max(...todos.map(todo => todo.id)) + 1 : 1);
 
 const addTodo = content => {
   let newTodo = { "id" : generateId(), content, completed: false};
-  ajax.post('/todos', newTodo, todo => todos = [todo, ...todos]);
+  ajax.post('/todos', newTodo, todo => {
+    todos = todo;
+    render();
+  });
   // todos = [{ id: generateId(), content, completed: false }, ...todos];
   // console.log('[addTodo]', todos);
   console.log(newTodo);
-  render();
+  
 };
 
 const toggleTodo = id => {
   ajax.patch(`/todos/${+id}`, { completed }, _todos => {
     todos = todos.map(todo => todo.id === +id ? { ...todo, completed: !todo.completed } : todo);
+    render();
   });
   // todos = todos.map(todo => (todo.id === +id ? { ...todo, completed: !todo.completed } : todo));
   // console.log('[toggleTodo]', todos);
-  render();
+  
 };
 
 const removeTodo = id => {
   ajax.delete(`/todos/${+id}`, _ => {
     todos = todos.filter(todo => todo.id !== +id);
+    render();
   });
   // todos = todos.filter(todo => todo.id !== +id);
   // console.log('[removeTodo]', todos);
-  render();
+  
 };
 
 const toggleCompleteAll = completed => {
-  ajax.patch('/todos', completed, todo => {
-    todos = todos.map(todo => ({ ...todo, completed }));
+  ajax.patch('/todos', { completed } , todo => {
+    todos = todo;
+    render();
   });
   // todos = todos.map(todo => ({ ...todo, completed }));
   // console.log('[toggleCompleteAll]', todos);
-   render();
+   
   
 };
 
 const removeCompleted = () => {
-  todos.forEach(todo => ajax.delete(`/todos/${todo.id}`, todos = todos.filter(todo => !todo.completed)));
+  todos.forEach(todo => {
+    ajax.delete(`/todos/${todo.id}`, todos = todos.filter(todo => !todo.completed))
+    render();
+  });
   // todos = todos.filter(todo => !todo.completed);
   // console.log('[removeCompleted]', todos);
 
-  render();
+  
 };
 
 const changeNavState = id => {
   [...$nav.children].forEach($navItem => {
     $navItem.classList.toggle('active', $navItem.id === id);
   });
-
   navState = id;
 
   console.log('[changeNavState]', navState);
@@ -95,7 +107,14 @@ const changeNavState = id => {
 };
 
 // Event bindings
-window.onload = getTodos;
+window.onload = () => {
+  ajax.get('/todos', _todos => {
+     todos = _todos
+     todos.sort((todo1, todo2) => todo2.id - todo1.id);
+     render();
+  });
+  
+}
          
 
 
